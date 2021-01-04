@@ -1,5 +1,5 @@
 # originally from the project https://github.com/wurstmeister/kafka-docker and https://hub.docker.com/r/wurstmeister/kafka
-# docker-compose up -f docker-compose-all-services.yml
+# docker-compose -f docker-compose-all-services.yml up
 version: '2'
 services:
   zookeeper:
@@ -18,5 +18,5 @@ services:
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-#  producer:
-
+  producer:
+    image: generalmeow/bigly-producer:0.0.1-SNAPSHOT
