@@ -20,3 +20,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
   producer:
     image: generalmeow/bigly-producer:0.0.1-SNAPSHOT
+    environment:
+      BOOTSTRAP_SERVER: kafka
+      BOOTSTRAP_SERVER_PORT: 9092
