@@ -9,7 +9,7 @@ services:
   kafka:
     build:
       context: ./kafka
-      dockerfile: ./kafka/Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "9092:9092"
     environment:
