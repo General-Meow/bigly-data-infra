@@ -21,10 +21,10 @@ services:
   producer:
     image: generalmeow/bigly-producer:latest
     environment:
-      BOOTSTRAP_SERVER: kafka
+      BOOTSTRAP_SERVER: 192.168.1.81
       BOOTSTRAP_SERVER_PORT: 9092
-  consumer:
-    image: generalmeow/bigly-consumer:latest
+  outputter:
+    image: generalmeow/bigly-outputter:latest
     environment:
-      BOOTSTRAP_SERVER: kafka
+      BOOTSTRAP_SERVER: 192.168.1.81
       BOOTSTRAP_SERVER_PORT: 9092
