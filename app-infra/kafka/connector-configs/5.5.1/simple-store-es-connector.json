@@ -1,0 +1,29 @@
+{
+  "name": "simple-store-es-connector",
+  "config": {
+    "value.converter.schemas.enable": "false",
+    "name": "simple-store-es-connector",
+    "connector.class": "io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
+    "tasks.max": "1",
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "value.converter": "org.apache.kafka.connect.json.JsonConverter",
+    "config.action.reload": "restart",
+    "errors.log.enable": "true",
+    "errors.log.include.messages": "true",
+    "topics": "argos-public-simple-api-topic",
+    "errors.deadletterqueue.topic.name": "argos-public-simple-api-dlq",
+    "errors.deadletterqueue.topic.replication.factor": "1",
+    "errors.deadletterqueue.context.headers.enable": "true",
+    "connection.url": "http://host.docker.internal:9200",
+    "type.name": "_doc",
+    "schema.ignore": "true",
+    "topic.schema.ignore": "argos-public-simple-api-topic",
+    "drop.invalid.message": "false",
+    "behavior.on.null.values": "FAIL",
+    "behavior.on.malformed.documents": "FAIL",
+    "transforms": "AddPrefix",
+    "transforms.AddPrefix.type": "org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.AddPrefix.regex": ".*",
+    "transforms.AddPrefix.replacement": "simplestore"
+  }
+}

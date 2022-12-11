@@ -1,0 +1,12 @@
+# Service will be available at 127.0.0.1:<port>
+# Map the k8s service on a local port to the service's port
+tcp:
+  # port: "namespace/cluster-ip-service.yaml:port"
+#  4566: "local/localstack:4566"
+  8081: "local/custom-kafka-cp-schema-registry:8081"
+  8083: "local/custom-kafka-cp-kafka-connect:8083"
+  9021: "local/custom-kafka-cp-control-center:9021"
+  8088: "local/custom-kafka-cp-ksql-server:8088"
+#  9200: "local/elasticsearch-place-master:9200"
+  7998: "build/jenkins:8080"
+  50000: "build/jenkins:50000"

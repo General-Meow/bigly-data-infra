@@ -1,0 +1,33 @@
+repositories:
+  - name: confluentinc
+    url: https://confluentinc.github.io/cp-helm-charts
+  - name: localstack-charts
+    url: https://localstack.github.io/helm-charts
+  - name: bitami
+    url: https://charts.bitnami.com/bitnami
+
+
+releases:
+  - name: kafka
+    namespace: local
+    chart: confluentinc/cp-helm-charts
+    version: 0.6.1
+    values:
+      - kafka/values.yaml
+    labels:
+      app: kafka
+    installed: false
+
+  - name: custom-kafka
+    namespace: local
+    chart: ./cp-helm-charts
+    values:
+      - kafka/values.yaml
+    labels:
+      app: kafka
+    installed: true
+
+helmDefaults:
+  kubeContext: microk8s
+  wait: true
+  timeout: 500

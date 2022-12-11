@@ -1,0 +1,146 @@
+# for the k8s plugin documentation, see: https://plugins.jenkins.io/kubernetes/
+# jenkinsTunnel is the service url of the jenkins agent. typically jenkins-agent.svc.<namespace>.local:50000
+# don't forget to change the password for admin under securityRealm: ... <password>
+persistence:
+  storageClass: microk8s-hostpath
+
+controller:
+  additionalPlugins:
+    - blueocean
+    - github
+    - job-dsl
+  JCasC:
+    enabled: true
+    defaultConfig: false
+    configScripts:
+      system-configuration: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - usernamePassword:
+                  description: "username and password for github general meow"
+                  id: "general-meow-creds"
+                  password: "{AQAAABAAAAAQHb4xMZksmhcLly4iyCkFDHi3mskj9bQmu29teXBXtuU=}"
+                  scope: GLOBAL
+                  username: "spl.ivalis@gmail.com"
+        jenkins:
+          numExecutors: 5
+          securityRealm:
+            local:
+              allowsSignup: false
+              enableCaptcha: false
+              users:
+              - id: "paul"
+                name: "Jenkins Admin"
+                password: "<password>"
+          authorizationStrategy:
+            loggedInUsersCanDoAnything:
+              allowAnonymousRead: false
+          clouds:
+            - kubernetes:
+                name: "microk8s"
+                serverUrl: "https://192.168.1.81:16443"
+                skipTlsVerify: true
+                namespace: "build"
+                jenkinsUrl: "http://jenkins.build.svc.cluster.local:8080"
+                jenkinsTunnel: "jenkins-agent.build.svc.cluster.local:50000"
+                containerCapStr: 42
+                maxRequestsPerHostStr: 64
+                retentionTimeout: 5
+                connectTimeout: 10
+                readTimeout: 20
+                templates:
+                  - containers:
+                    - args: "cat"
+                      name: "jnlp"
+                      workingDir: "/home/jenkins"
+                      image: "jenkins/inbound-agent"
+                      envVars:
+                        - envVar:
+                            key: 'JENKINS_URL'
+                            value: 'http://jenkins.build.svc.cluster.local:8080'
+                      livenessProbe:
+                        failureThreshold: 0
+                        initialDelaySeconds: 0
+                        periodSeconds: 0
+                        successThreshold: 0
+                        timeoutSeconds: 0
+                    - args: "cat"
+                      name: "java-build-container"
+                      workingDir: "/home/jenkins"
+                      image: "amazoncorretto:17.0.4-alpine3.16"
+                      envVars:
+                        - envVar:
+                            key: 'JENKINS_URL'
+                            value: 'http://jenkins.build.svc.cluster.local:8080'
+                      livenessProbe:
+                        failureThreshold: 0
+                        initialDelaySeconds: 0
+                        periodSeconds: 0
+                        successThreshold: 0
+                        timeoutSeconds: 0
+                    workspaceVolume:
+                      emptyDirWorkspaceVolume:
+                        memory: false
+                    yamlMergeStrategy: "override"
+                    name: "pod-template"
+                    namespace: "build"
+        unclassified:
+          location:
+            adminAddress: "spl.ivalis@gmail.com"
+            url: "https://192.168.1.81:7998"
+      jobs: |
+        jobs:
+          - script: |
+
+              def jobNames = [
+                "bigly-producer",
+                "bigly-ws-prices",
+                "bigly-user-service",
+                "bigly-outputter"
+              ]
+
+              jobNames.each { jobName ->
+                multibranchPipelineJob(jobName) {
+                  branchSources {
+                    github {
+                      id(jobName) // IMPORTANT: use a constant and unique identifier
+                      repoOwner('General-Meow')
+                      repository(jobName)
+                      scanCredentialsId('general-meow-creds')
+                    }
+                  }
+                  orphanedItemStrategy {
+                    discardOldItems {
+                      numToKeep(5)
+                    }
+                  }
+                }
+              }
+
+              def deploymentEnv = [
+                "dev",
+                "stage",
+                "prod"
+              ]
+              pipelineJob('deployer paramitized pipeline') {
+                  parameters {
+                    choiceParam("projectName", jobNames.toList(), "Name of the project to deploy")
+                    stringParam("projectVersion", "1.0.0-SNAPSHOT", "The version of the project to deploy")
+                    choiceParam("deploymentEnv", deploymentEnv.toList(), "The environment to deploy to")
+                  }
+                  definition {
+                    cpsScm {
+                      scm {
+                        git {
+                          remote {
+                            credentials("General-Meow")
+                            url("https://github.com/General-Meow/bigly-data-infra")
+                          }
+                        }
+                      }
+                      scriptPath("Jenkinsfile")
+                    }
+                  }
+              }

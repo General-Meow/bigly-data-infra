@@ -1,0 +1,15 @@
+repositories:
+  - name: jenkins
+    url: https://charts.jenkins.io
+
+
+releases:
+  - name: jenkins
+    namespace: build
+    chart: jenkins/jenkins
+    version: 4.2.6
+    values:
+      - jenkins/values.yaml
+    labels:
+      app: jenkins
+    installed: true
